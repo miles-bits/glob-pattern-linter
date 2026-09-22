@@ -1,4 +1,5 @@
 from .errors import GlobSyntaxError
+from .matcher import CompiledPattern, compile_pattern, match
 from .parser import Brace, CharClass, FileParseResult, Globstar, Literal, Pattern, Question, Star, parse_file, parse_line
 from .printer import pretty_print
 
@@ -15,4 +16,7 @@ __all__ = [
     'parse_line',
     'parse_file',
     'pretty_print',
+    'CompiledPattern',
+    'compile_pattern',
+    'match',
 ]

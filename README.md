@@ -18,8 +18,8 @@ pointing at it. It also pretty-prints a pattern back to a minimal
 canonical form, so `src/\a\b.py` (a backslash-escaped `a` and `b`,
 neither of which needed escaping) normalizes to `src/ab.py`.
 
-This is a parser and a printer, not a matcher: it does not (yet) tell
-you whether a given path matches a pattern. See the roadmap below.
+It can also compile a parsed pattern into something that tests whether
+a given path matches it.
 
 ## Usage
 
@@ -87,6 +87,24 @@ The unnecessary escapes on `a` and `b` are dropped; the escape on `*`
 stays, because without it that character means "match anything" instead
 of a literal asterisk.
 
+Test whether a path matches a pattern:
+
+```python
+from globlint import parse_line, compile_pattern
+
+pattern = parse_line("src/**/*.py")
+matcher = compile_pattern(pattern)
+matcher.match("src/a.py")        # True
+matcher.match("src/pkg/b.py")    # True
+matcher.match("src/a.txt")       # False
+```
+
+A pattern with no `/` only matches a single path segment (the same way
+`fnmatch` does), not a file at any depth. `compile_pattern` says nothing
+about a pattern's `!` negation - combining several patterns' results is
+left to the caller, since the right precedence rules depend on what
+they're being used for.
+
 ## Syntax supported
 
 - `*` — any run of characters within one path segment
@@ -104,7 +122,6 @@ of a literal asterisk.
 
 ## Roadmap
 
-- compile the AST into an actual matcher that tests paths against a pattern
 - preserve comments and blank lines when pretty-printing a whole file
 - a small CLI (`globlint check patterns.txt`)
 - support POSIX class names like `[:alpha:]`
