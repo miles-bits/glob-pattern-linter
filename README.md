@@ -87,6 +87,35 @@ The unnecessary escapes on `a` and `b` are dropped; the escape on `*`
 stays, because without it that character means "match anything" instead
 of a literal asterisk.
 
+Pretty-print a whole file at once, keeping its comments and blank lines
+intact instead of dropping them:
+
+```python
+from globlint import pretty_print_file
+
+text = """
+# build artifacts
+*.pyc
+src/\\a\\b.py
+
+!keep-this-one.log
+""".strip('\n')
+
+print(pretty_print_file(text))
+```
+
+```
+# build artifacts
+*.pyc
+src/ab.py
+
+!keep-this-one.log
+```
+
+`pretty_print_file` raises `GlobSyntaxError` on the first bad line, the
+same as `parse_line`; run `parse_file` first if you want every error in
+the file instead of just the first one.
+
 Test whether a path matches a pattern:
 
 ```python
@@ -122,7 +151,6 @@ they're being used for.
 
 ## Roadmap
 
-- preserve comments and blank lines when pretty-printing a whole file
 - a small CLI (`globlint check patterns.txt`)
 - support POSIX class names like `[:alpha:]`
 - collect more than one error per line instead of stopping at the first

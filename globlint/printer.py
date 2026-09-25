@@ -5,7 +5,7 @@ needed in the first place (``\\a`` becomes ``a``) so that two patterns
 which mean the same thing tend to print the same way.
 """
 
-from .parser import Brace, CharClass, Globstar, Literal, Pattern, Question, Star
+from .parser import Brace, CharClass, Globstar, Literal, Pattern, Question, Star, parse_line
 
 _NEEDS_ESCAPE = set('*?[]{}\\')
 
@@ -54,3 +54,20 @@ def pretty_print(pattern: Pattern) -> str:
         # back into a pattern file
         body = '\\' + body
     return ('!' if pattern.negated else '') + body
+
+
+def pretty_print_file(text: str) -> str:
+    """Pretty-print a whole file of patterns, one per line.
+
+    Comment lines and blank lines are copied through untouched instead of
+    being dropped, so the output stays a diff-friendly rewrite of the
+    input rather than a stripped-down version of it. Raises
+    GlobSyntaxError on the first malformed line; check with parse_file
+    first if you want every error instead of just the first.
+    """
+    lines = []
+    for line_no, raw_line in enumerate(text.splitlines(), start=1):
+        line_text = raw_line.rstrip('\r\n')
+        pattern = parse_line(raw_line, line_no)
+        lines.append(line_text if pattern is None else pretty_print(pattern))
+    return '\n'.join(lines)
